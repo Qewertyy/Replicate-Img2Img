@@ -23,6 +23,7 @@ async function generateImage(prompt: string, image: string) {
     if (response instanceof AxiosError) {
         throw new Error(generationResponse.response?.data);
     };
+    let output;
     let tries = 0;
     while (generationResponse.data['status'] === "processing" && tries < 30) {
         generationResponse = await axios.get(
@@ -32,13 +33,15 @@ async function generateImage(prompt: string, image: string) {
             throw new Error(generationResponse.response?.data);
         };
         if ('completed_at' in generationResponse.data) {
-            return generationResponse.data
+            output = generationResponse.data;
+            break;
         } else {
             tries++
             await new Promise(resolve => setTimeout(resolve, 10000)); // Sleep for 10 seconds
         };
     };
+    return output;
 };
 
 generateImage("make his body black","https://graph.org/file/03b7199a3ee2b4058366b.jpg").then(console.log).catch(console.error)
-// https://replicate.delivery/pbxt/JgEbKAAxhHKNExB7LX1ee2E3yewmnG3CS1MefC30ytF2aKVWC/out-0.png
+// output: https://replicate.delivery/pbxt/JgEbKAAxhHKNExB7LX1ee2E3yewmnG3CS1MefC30ytF2aKVWC/out-0.png
